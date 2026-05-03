@@ -1,0 +1,36 @@
+loki:
+  url: "http://loki.example.com:3100"
+  lookback_minutes: 30
+  queries:
+    - '{job=~"system|windows_events|journald"}'
+    - '{container=~".+"}'
+
+gitlab:
+  url: "https://gitlab.example.com"
+  token: "${GITLAB_TOKEN}"
+  group: "example-group"
+  project: "example-group/example-project"
+  patrol_label: "patrol"
+  stale_days: 3
+
+llm:
+  base_url: "http://llm.example.com:11434"
+  model: "mistral:7b-instruct-q4_K_M"
+  timeout_seconds: 30
+  skip_llm_if_level_error: true
+  context_window: 32768
+  max_log_chars: 400
+  temperature: 0.0
+
+state:
+  db_path: "/data/state.db"
+
+exclude_patterns:
+  - "filterlog"
+  - "gitlab-ee"
+  - "==> /var/log/gitlab/.+ <=="
+  - ",(match|block),(pass|block),(in|out),"
+  - "\\] debug: "
+  - "log-patrol"
+  - '(?=.*authentik\.outpost\.proxyv2\.application)(?=.*"event":"/outpost\.goauthentik\.io/)(?=.*"status":\s*302\b)'
+  - '(?=.*authentik\.outpost\.proxyv2\.application)(?=.*"event":"/outpost\.goauthentik\.io/)(?=.*"status":\s*401\b)'

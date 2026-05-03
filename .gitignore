@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.venv/
+.env
+data/state.db
+config.yml
+config.yaml
+
+.worktrees/

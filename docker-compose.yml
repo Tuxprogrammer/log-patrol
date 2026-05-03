@@ -1,0 +1,41 @@
+services:
+  log-patrol:
+    build: .
+    container_name: log-patrol
+    restart: unless-stopped
+    environment:
+      - GITLAB_TOKEN=${GITLAB_TOKEN}
+      - TZ=America/Chicago
+    volumes:
+      - ./data:/data
+      - ./config.yml:/app/config.yml:ro
+    depends_on:
+      - ollama
+    networks:
+      - patrol-net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: log-patrol-ollama
+    restart: unless-stopped
+    environment:
+      - TZ=America/Chicago
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ollama-models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - patrol-net
+
+volumes:
+  ollama-models:
+
+networks:
+  patrol-net:

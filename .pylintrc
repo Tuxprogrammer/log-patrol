@@ -1,0 +1,8 @@
+[MASTER]
+ignore=.venv,.mypy_cache,.pytest_cache,__pycache__
+
+[FORMAT]
+max-line-length=100
+
+[TYPECHECK]
+ignored-modules=drain3,stop_words

@@ -1,0 +1,77 @@
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  PYTHONPATH: "$CI_PROJECT_DIR"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  STORAGE_DRIVER: "vfs"
+  BUILDAH_FORMAT: "docker"
+  BUILDAH_ISOLATION: "chroot"
+
+cache:
+  key: "$CI_JOB_IMAGE"
+  paths:
+    - .cache/pip
+
+default:
+  tags:
+    - docker
+
+lint:python:
+  stage: lint
+  image: python:3.12-alpine
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - pydocstyle --convention=google src tests smoke_test.py
+    - pylint src tests smoke_test.py
+    - mypy --config-file mypy.ini
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+test:pytest:
+  stage: test
+  image: python:3.12-alpine
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+    - mkdir -p reports coverage
+  script:
+    - pytest -q --junitxml=reports/junit.xml --cov=src --cov-report=term-missing:skip-covered --cov-report=xml:coverage/cobertura.xml
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+  artifacts:
+    when: always
+    paths:
+      - reports/junit.xml
+      - coverage/cobertura.xml
+    reports:
+      junit: reports/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.xml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+build:image:
+  stage: build
+  image: quay.io/buildah/stable:v1.39
+  before_script:
+    - buildah --storage-driver="$STORAGE_DRIVER" login --tls-verify=false --username "$CI_REGISTRY_USER" --password "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - export IMAGE_SHA="$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+    - export IMAGE_REF="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+    - buildah --storage-driver="$STORAGE_DRIVER" bud --pull --layers --isolation="$BUILDAH_ISOLATION" --tls-verify=false -t "$IMAGE_SHA" -t "$IMAGE_REF" -f "$CI_PROJECT_DIR/Dockerfile" "$CI_PROJECT_DIR"
+    - buildah --storage-driver="$STORAGE_DRIVER" push --tls-verify=false "$IMAGE_SHA" "docker://$IMAGE_SHA"
+    - buildah --storage-driver="$STORAGE_DRIVER" push --tls-verify=false "$IMAGE_REF" "docker://$IMAGE_REF"
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        buildah --storage-driver="$STORAGE_DRIVER" tag "$IMAGE_SHA" "$CI_REGISTRY_IMAGE:latest"
+        buildah --storage-driver="$STORAGE_DRIVER" push --tls-verify=false "$CI_REGISTRY_IMAGE:latest" "docker://$CI_REGISTRY_IMAGE:latest"
+      fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
