@@ -146,7 +146,7 @@ summary lines, and GitLab issue creation/update events.
 To run locally from the repository checkout instead:
 
 ```bash
-cd /home/runner/work/log-patrol/log-patrol
+cd <repo-root>
 docker compose run --rm log-patrol python -m src.main
 ```
 
@@ -166,7 +166,7 @@ docker compose logs --tail=50 log-patrol
 For a local checkout:
 
 ```bash
-cd /home/runner/work/log-patrol/log-patrol
+cd <repo-root>
 docker compose logs -f log-patrol
 ```
 
@@ -209,7 +209,7 @@ docker compose up -d log-patrol
 Local reset:
 
 ```bash
-cd /home/runner/work/log-patrol/log-patrol
+cd <repo-root>
 rm -f data/state.db
 docker compose up -d log-patrol
 ```
@@ -219,7 +219,7 @@ docker compose up -d log-patrol
 Run the live connectivity probe from the repository checkout:
 
 ```bash
-cd /home/runner/work/log-patrol/log-patrol
+cd <repo-root>
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
