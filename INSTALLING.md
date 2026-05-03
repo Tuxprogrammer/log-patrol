@@ -234,31 +234,23 @@ python smoke_test.py
 
 Configuration file: `config.yml`
 
-- `loki.url`: Loki base URL
-- `loki.lookback_minutes`: Query window for each patrol
-- `loki.queries`: LogQL selectors queried each run
-- `gitlab.url`: GitLab base URL
-- `gitlab.token`: API token (supports env interpolation)
-- `gitlab.group`: Group path for issue discovery
-- `gitlab.project`: Project path where Log Patrol creates or updates issues
-- `gitlab.patrol_label`: Label applied to patrol issues
-- `gitlab.stale_days`: Close inactive patrol issues after this many days
-- `llm.base_url`: Ollama base URL for the final sentiment gate
-- `llm.model`: Ollama model name
-- `llm.timeout_seconds`: HTTP timeout for Ollama classification calls
-- `llm.context_window`: Context window passed to Ollama
-- `llm.max_log_chars`: Maximum cleaned log length sent to the LLM
-- `llm.temperature`: Reserved config value; current runtime sends a deterministic prompt
-- `llm.skip_llm_if_level_error`: Compatibility config key; current runtime still applies the LLM gate
-- `state.db_path`: SQLite file path
-- `exclude_patterns`: Optional list of regex patterns dropped before template mining
-
-## CI/CD
-
-`.gitlab-ci.yml` currently runs:
-
-- `pydocstyle --convention=google src tests smoke_test.py`
-- `pylint src tests smoke_test.py`
-- `mypy --config-file mypy.ini`
-- `pytest -q --junitxml=reports/junit.xml --cov=src --cov-report=term-missing:skip-covered --cov-report=xml:coverage/cobertura.xml`
-- image build and push for the configured registry target
+| Key | Description |
+|-----|-------------|
+| `loki.url` | Loki base URL |
+| `loki.lookback_minutes` | Query window for each patrol |
+| `loki.queries` | LogQL selectors queried each run |
+| `gitlab.url` | GitLab base URL |
+| `gitlab.token` | API token (supports env interpolation) |
+| `gitlab.group` | Group path for issue discovery |
+| `gitlab.project` | Project path where Log Patrol creates or updates issues |
+| `gitlab.patrol_label` | Label applied to patrol issues |
+| `gitlab.stale_days` | Close inactive patrol issues after this many days |
+| `llm.base_url` | Ollama base URL for the final sentiment gate |
+| `llm.model` | Ollama model name |
+| `llm.timeout_seconds` | HTTP timeout for Ollama classification calls |
+| `llm.context_window` | Context window passed to Ollama |
+| `llm.max_log_chars` | Maximum cleaned log length sent to the LLM |
+| `llm.temperature` | Reserved config value; current runtime sends a deterministic prompt |
+| `llm.skip_llm_if_level_error` | Compatibility config key; current runtime still applies the LLM gate |
+| `state.db_path` | SQLite file path |
+| `exclude_patterns` | Optional list of regex patterns dropped before template mining |
